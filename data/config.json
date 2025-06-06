@@ -1,0 +1,19 @@
+{
+  "force": true,
+  "site_url": "",
+  "cdn": "",
+  "jwt_secret": "random_generated",
+  "token_expires_in": 48,
+  "database": {
+    "type": "sqlite3",
+    "host": "",
+    "port": 0,
+    "user": "",
+    "password": "",
+    "name": "",
+    "db_file": "/home/user/data/data.db",
+    "table_prefix": "x_",
+    "ssl_mode": "",
+    "dsn": ""
+  }
+}
