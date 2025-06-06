@@ -1,0 +1,2 @@
+# 确保脚本文件不被 Git LFS 处理
+*.sh text eol=lf

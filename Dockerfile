@@ -18,12 +18,12 @@ RUN pip install --no-cache-dir requests webdavclient3
 
 COPY --chown=user . $HOME/app
 COPY --chown=user sync_data.sh $HOME/app/
-
-RUN chmod +x $HOME/app/apksapwk && \
-    chmod +x $HOME/app/sync_data.sh && \
-    ls -la $HOME/app/sync_data.sh
+RUN chmod +x $HOME/app/sync_data.sh && \
+    echo "Checking sync_data.sh:" && \
+    ls -la $HOME/app/sync_data.sh && \
+    cat $HOME/app/sync_data.sh | head -5
 
 RUN chown -R user:user /home/user
 USER user
 
-CMD ["/bin/bash", "-c", "if [ -f $HOME/app/sync_data.sh ]; then $HOME/app/sync_data.sh & else echo 'Warning: sync_data.sh not found'; fi; sleep 10 && ./apksapwk server"]
+CMD ["/bin/bash", "-c", "echo 'Starting container...' && if [ -f $HOME/app/sync_data.sh ]; then echo 'Found sync_data.sh, executing...' && $HOME/app/sync_data.sh & else echo 'ERROR: sync_data.sh not found at $HOME/app/'; ls -la $HOME/app/; fi; sleep 10 && ./apksapwk server"]

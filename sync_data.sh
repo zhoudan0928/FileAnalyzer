@@ -2,6 +2,12 @@
 # 确保文件使用 LF 而非 CRLF 行尾
 # 如果在 Windows 上编辑过此文件，请确保转换为 Unix 格式
 
+# 添加调试信息
+echo "Starting sync_data.sh script at $(date)"
+echo "Current directory: $(pwd)"
+echo "Script location: $0"
+echo "Home directory: $HOME"
+
 # 检查环境变量
 if [[ -z "$WEBDAV_URL" ]] || [[ -z "$WEBDAV_USERNAME" ]] || [[ -z "$WEBDAV_PASSWORD" ]]; then
     echo "Starting without backup functionality - missing WEBDAV_URL, WEBDAV_USERNAME, or WEBDAV_PASSWORD"
