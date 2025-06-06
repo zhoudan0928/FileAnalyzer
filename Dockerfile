@@ -16,13 +16,18 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --no-cache-dir requests webdavclient3
 
+# 复制应用文件并设置权限
 COPY --chown=user . $HOME/app
 COPY --chown=user sync_data.sh $HOME/app/
-RUN chmod +x $HOME/app/sync_data.sh && \
-    echo "Checking sync_data.sh:" && \
-    ls -la $HOME/app/sync_data.sh && \
-    cat $HOME/app/sync_data.sh | head -5
 
+# 确保所有脚本和可执行文件有执行权限
+RUN chmod +x $HOME/app/sync_data.sh && \
+    chmod +x $HOME/app/apksapwk && \
+    echo "Checking file permissions:" && \
+    ls -la $HOME/app/sync_data.sh && \
+    ls -la $HOME/app/apksapwk
+
+# 确保用户拥有所有文件的权限
 RUN chown -R user:user /home/user
 USER user
 
