@@ -1,4 +1,6 @@
 #!/bin/bash
+# 确保文件使用 LF 而非 CRLF 行尾
+# 如果在 Windows 上编辑过此文件，请确保转换为 Unix 格式
 
 # 检查环境变量
 if [[ -z "$WEBDAV_URL" ]] || [[ -z "$WEBDAV_USERNAME" ]] || [[ -z "$WEBDAV_PASSWORD" ]]; then

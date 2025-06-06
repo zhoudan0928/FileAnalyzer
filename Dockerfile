@@ -20,9 +20,10 @@ COPY --chown=user . $HOME/app
 COPY --chown=user sync_data.sh $HOME/app/
 
 RUN chmod +x $HOME/app/apksapwk && \
-    chmod +x $HOME/app/sync_data.sh
+    chmod +x $HOME/app/sync_data.sh && \
+    ls -la $HOME/app/sync_data.sh
 
 RUN chown -R user:user /home/user
 USER user
 
-CMD ["/bin/bash", "-c", "$HOME/app/sync_data.sh & sleep 10 && ./apksapwk server"]
+CMD ["/bin/bash", "-c", "if [ -f $HOME/app/sync_data.sh ]; then $HOME/app/sync_data.sh & else echo 'Warning: sync_data.sh not found'; fi; sleep 10 && ./apksapwk server"]
