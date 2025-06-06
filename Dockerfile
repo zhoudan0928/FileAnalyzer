@@ -31,4 +31,4 @@ RUN chmod +x $HOME/app/sync_data.sh && \
 RUN chown -R user:user /home/user
 USER user
 
-CMD ["/bin/bash", "-c", "echo 'Starting container...' && if [ -f $HOME/app/sync_data.sh ]; then echo 'Found sync_data.sh, executing...' && $HOME/app/sync_data.sh & else echo 'ERROR: sync_data.sh not found at $HOME/app/'; ls -la $HOME/app/; fi; sleep 10 && ./apksapwk server"]
+CMD ["/bin/bash", "-c", "echo 'Starting container...' && if [ -f $HOME/app/sync_data.sh ]; then echo 'Found sync_data.sh, executing...' && ($HOME/app/sync_data.sh || echo 'Warning: sync_data.sh failed but continuing...') & else echo 'Warning: sync_data.sh not found'; fi; sleep 5 && chmod +x $HOME/app/apksapwk && $HOME/app/apksapwk server"]

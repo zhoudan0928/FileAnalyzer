@@ -21,6 +21,10 @@ if [ -n "$WEBDAV_BACKUP_PATH" ]; then
     FULL_WEBDAV_URL="${WEBDAV_URL}/${WEBDAV_BACKUP_PATH}"
 fi
 
+# 测试 WebDAV 连接
+echo "Testing WebDAV connection to $FULL_WEBDAV_URL..."
+curl -v -u "$WEBDAV_USERNAME:$WEBDAV_PASSWORD" "$FULL_WEBDAV_URL" 2>&1 | grep "HTTP/"
+
 # 激活虚拟环境
 source $HOME/venv/bin/activate
 
@@ -34,25 +38,57 @@ import tarfile
 import requests
 import shutil
 from webdav3.client import Client
-options = {
-    'webdav_hostname': '$FULL_WEBDAV_URL',
-    'webdav_login': '$WEBDAV_USERNAME',
-    'webdav_password': '$WEBDAV_PASSWORD'
-}
-client = Client(options)
-backups = [file for file in client.list() if file.endswith('.tar.gz') and file.startswith('alist_backup_')]
-if not backups:
-    print('没有找到备份文件')
-    sys.exit()
-latest_backup = sorted(backups)[-1]
-print(f'最新备份文件：{latest_backup}')
-with requests.get(f'$FULL_WEBDAV_URL/{latest_backup}', auth=('$WEBDAV_USERNAME', '$WEBDAV_PASSWORD'), stream=True) as r:
-    if r.status_code == 200:
-        with open(f'/tmp/{latest_backup}', 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
-        print(f'成功下载备份文件到 /tmp/{latest_backup}')
-        if os.path.exists(f'/tmp/{latest_backup}'):
+try:
+    options = {
+        'webdav_hostname': '$FULL_WEBDAV_URL',
+        'webdav_login': '$WEBDAV_USERNAME',
+        'webdav_password': '$WEBDAV_PASSWORD',
+        'verbose': True
+    }
+    print('Connecting to WebDAV server: ' + '$FULL_WEBDAV_URL')
+    client = Client(options)
+    
+    # 测试连接
+    try:
+        print('Testing connection...')
+        client.check()
+        print('Connection successful')
+    except Exception as e:
+        print('Connection test failed: ' + str(e))
+        sys.exit(1)
+    
+    # 获取文件列表
+    try:
+        print('Listing files...')
+        files = client.list()
+        print('Files found: ' + str(files))
+        backups = [file for file in files if file.endswith('.tar.gz') and file.startswith('alist_backup_')]
+    except Exception as e:
+        print('Failed to list files: ' + str(e))
+        sys.exit(1)
+        
+    if not backups:
+        print('没有找到备份文件')
+        sys.exit(0)
+    
+    latest_backup = sorted(backups)[-1]
+    print(f'最新备份文件：{latest_backup}')
+    
+    # 使用 requests 下载文件
+    try:
+        with requests.get(f'$FULL_WEBDAV_URL/{latest_backup}', auth=('$WEBDAV_USERNAME', '$WEBDAV_PASSWORD'), stream=True) as r:
+            r.raise_for_status()
+            with open(f'/tmp/{latest_backup}', 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f'成功下载备份文件到 /tmp/{latest_backup}')
+    except Exception as e:
+        print('下载备份失败: ' + str(e))
+        sys.exit(1)
+    
+    # 解压文件
+    if os.path.exists(f'/tmp/{latest_backup}'):
+        try:
             # 如果目录已存在，先删除它
             if os.path.exists('$HOME/data'):
                 shutil.rmtree('$HOME/data')
@@ -63,10 +99,14 @@ with requests.get(f'$FULL_WEBDAV_URL/{latest_backup}', auth=('$WEBDAV_USERNAME',
                 tar.extractall('$HOME/data')
             
             print(f'成功从 {latest_backup} 恢复备份')
-        else:
-            print('下载的备份文件不存在')
+        except Exception as e:
+            print('解压备份失败: ' + str(e))
+            sys.exit(1)
     else:
-        print(f'下载备份失败：{r.status_code}')
+        print('下载的备份文件不存在')
+except Exception as e:
+    print('发生错误: ' + str(e))
+    sys.exit(1)
 "
 }
 
